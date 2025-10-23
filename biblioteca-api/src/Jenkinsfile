@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    tools {
+        // O nome 'Maven-3.9.0' deve ser o mesmo configurado no seu Jenkins
+        maven 'Maven-3.9.0'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Puxa o código do seu repositório
+                git branch: 'main', url: 'https://github.com/thiagomenicucci/biblioteca-java.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Compila e empacota o projeto
+                sh 'mvn clean package'
+            }
+        }
+
+        stage('Unit & Integration Tests') {
+            steps {
+                // Roda os testes (unitários e de integração)
+                sh 'mvn test'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                // Etapa para análise de código
+                echo 'Rodando análise do SonarQube...'
+                // (Requer configuração do SonarScanner no Jenkins)
+                // sh 'mvn sonar:sonar'
+            }
+        }
+    }
+
+    post {
+        always {
+            // Publica os relatórios de teste
+            junit 'target/surefire-reports/*.xml'
+        }
+    }
+}
